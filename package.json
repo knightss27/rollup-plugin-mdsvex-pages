@@ -25,5 +25,9 @@
   "homepage": "https://github.com/knightss27/rollup-plugin-mdsvex-pages#readme",
   "dependencies": {
     "mdsvex": "^0.8.8"
+  },
+  "peerDependencies": {
+    "svelte": "3.x",
+    "svelte-spa-router": "^3.x"
   }
 }
