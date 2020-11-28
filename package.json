@@ -1,0 +1,29 @@
+{
+  "name": "rollup-plugin-mdsvex-pages",
+  "version": "1.0.6",
+  "description": "Markdown-based documentation/blog generator built with MDsveX.",
+  "main": "index.cjs.js",
+  "scripts": {
+    "test": "mdsvex-pages-test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/knightss27/rollup-plugin-mdsvex-pages/"
+  },
+  "keywords": [
+    "rollup-plugin",
+    "mdsvex",
+    "svelte",
+    "markdown",
+    "documentation"
+  ],
+  "author": "Seth Knights",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/knightss27/rollup-plugin-mdsvex-pages/issues"
+  },
+  "homepage": "https://github.com/knightss27/rollup-plugin-mdsvex-pages#readme",
+  "dependencies": {
+    "mdsvex": "^0.8.8"
+  }
+}
