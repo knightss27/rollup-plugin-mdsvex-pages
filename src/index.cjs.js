@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const mdsvex = require('mdsvex');
 const matter = require('gray-matter');
 
@@ -38,9 +39,8 @@ function mdsvexPages(options) {
         async transform(code, id) {
 
             // Establish path and filename for later usage.
-            const path = id.split(`\\`);
-            const fileName = path[path.length - 1];
-            
+            const fileName = path.win32.basename(id);
+
             // Import changed and default options.
             const actualOpts = getOptions(options);
 
@@ -49,15 +49,16 @@ function mdsvexPages(options) {
                 
                 // Establish imports string and locations of .md files.
                 let imports = '';
-                const files = fs.readdirSync('./src/' + actualOpts.docPath)
+                const files = fs.readdirSync(path.resolve('src', actualOpts.docPath))
 
                 // Create the routes string for adding to svelte-spa-router.
                 let routes = '';
                 
                 // Add imports and routes for all .md files.
                 files.forEach(function (file, index) {
-                    let name = file.replace('.md', ''); 
-                    const metadata = matter(fs.readFileSync('./src/' + actualOpts.docPath + '/' + file)).data
+                    let name = path.parse(file).name;
+                    console.log(file);
+                    const metadata = matter(fs.readFileSync(path.resolve('src', actualOpts.docPath, file))).data
                     
                     imports += "import " + name + " from './" + actualOpts.docPath + "/" + file + "'; \n";
 
@@ -65,7 +66,7 @@ function mdsvexPages(options) {
                         name = metadata.id;
                     }
 
-                    routes += "routes.set('/" + actualOpts.docPath + "/" + name + "', " + file.replace('.md', '') + ");\n" 
+                    routes += "routes.set('/" + actualOpts.docPath + "/" + name + "', " + path.parse(file).name + ");\n" 
                 })
 
                 // Add those imports.
@@ -77,6 +78,8 @@ function mdsvexPages(options) {
                 const addRoutes = newValue.replace('</script>', 
                     routes + '</script>'
                 );
+
+                console.log(addRoutes);
 
                 return {
                     code: addRoutes,
@@ -94,7 +97,7 @@ function mdsvexPages(options) {
                 } else {
                     res.code = "<svelte:head><title>" + fileName.split('.')[0] + "</title></svelte:head> \n" + res.code;
                 }
-                
+
                 return {
                     code: res.code,
                     map: null
