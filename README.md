@@ -2,6 +2,8 @@
 
 A plugin to generate svelte files from markdown using MDsveX, and to write the routes for the docs using svelte-spa-router or sapper (coming soon).
 
+> Known bug: routes will not be re-calculated unless you re-run `npm run dev` or `npm run build` in your svelte project.
+
 ---
 # Setup
 
