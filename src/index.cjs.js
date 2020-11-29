@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const mdsvex = require('mdsvex');
+const matter = require('gray-matter');
 
 function mdsvexPages(options) {
     
@@ -49,20 +50,22 @@ function mdsvexPages(options) {
                 // Establish imports string and locations of .md files.
                 let imports = '';
                 const files = fs.readdirSync('./src/' + actualOpts.docPath)
-                
-                // Add imports for all .md files.
-                files.forEach(function (file, index) {
-                    const name = file.replace('.md', '');
-                    imports += "import " + name + " from './" + actualOpts.docPath + "/" + file + "'; \n "; 
-                })
 
                 // Create the routes string for adding to svelte-spa-router.
                 let routes = '';
-
-                // Fill the routes string with paths for all .md files.
+                
+                // Add imports and routes for all .md files.
                 files.forEach(function (file, index) {
-                    const name = file.replace('.md', '');
-                    routes += "routes.set('/" + actualOpts.docPath + "/" + name + "', " + name + ");\n" 
+                    let name = file.replace('.md', ''); 
+                    const metadata = matter(fs.readFileSync('./src/' + actualOpts.docPath + '/' + file)).data
+                    
+                    imports += "import " + name + " from './" + actualOpts.docPath + "/" + file + "'; \n";
+
+                    if (has(metadata, 'id') && metadata.id !== name) {
+                        name = metadata.id;
+                    }
+
+                    routes += "routes.set('/" + actualOpts.docPath + "/" + name + "', " + file.replace('.md', '') + ");\n" 
                 })
 
                 // Add those imports.
@@ -80,8 +83,18 @@ function mdsvexPages(options) {
                     map: null
                 }
             }
+            // Process the file if it is a MDsveX file.
             if (fileName.includes(actualOpts.mdxvexOptions.extensions)) {
-                const res = await mdsvex.compile(code, actualOpts.mdxvexOptions);
+                const metadata = matter(code).data;
+                let res = await mdsvex.compile(code, actualOpts.mdxvexOptions);
+
+                // Give the page a title.
+                if (has(metadata, 'title')) {
+                    res.code = "<svelte:head><title>" + metadata.title + "</title></svelte:head> \n" + res.code;
+                } else {
+                    res.code = "<svelte:head><title>" + fileName.split('.')[0] + "</title></svelte:head> \n" + res.code;
+                }
+                
                 return {
                     code: res.code,
                     map: null
