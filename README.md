@@ -2,6 +2,8 @@
 
 A plugin to generate svelte files from markdown using MDsveX, and to write the routes for the docs using svelte-spa-router or sapper (coming soon).
 
+> Known bug: routes will not be re-calculated unless you re-run `npm run dev` or `npm run build` in your svelte project.
+
 ---
 # Setup
 
@@ -12,6 +14,8 @@ Assuming you already have a Svelte project, install the package.
 In your `rollup.config.js` you can configure the options. Defaults are those listed below.
 
 ```js
+import mdsvexPages from 'rollup-plugin-mdsvex-pages'; 
+
 export default {
 ...
 plugins: [
