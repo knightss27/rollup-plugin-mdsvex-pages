@@ -57,7 +57,7 @@ function mdsvexPages(options) {
                 // Add imports and routes for all .md files.
                 files.forEach(function (file, index) {
                     let name = path.parse(file).name;
-                    console.log(file);
+                    
                     const metadata = matter(fs.readFileSync(path.resolve('src', actualOpts.docPath, file))).data
                     
                     imports += "import " + name + " from './" + actualOpts.docPath + "/" + file + "'; \n";
@@ -78,8 +78,6 @@ function mdsvexPages(options) {
                 const addRoutes = newValue.replace('</script>', 
                     routes + '</script>'
                 );
-
-                console.log(addRoutes);
 
                 return {
                     code: addRoutes,
