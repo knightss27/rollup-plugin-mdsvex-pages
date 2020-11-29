@@ -14,6 +14,8 @@ Assuming you already have a Svelte project, install the package.
 In your `rollup.config.js` you can configure the options. Defaults are those listed below.
 
 ```js
+import mdsvexPages from 'rollup-plugin-mdsvex-pages'; 
+
 export default {
 ...
 plugins: [
