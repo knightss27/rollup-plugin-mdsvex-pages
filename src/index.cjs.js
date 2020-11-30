@@ -14,6 +14,7 @@ function mdsvexPages(options) {
     const defaultOptions = {
         appName: 'App.svelte',
         docPath: 'docs',
+        hasSidebar: false,
         mdxvexOptions: {
             extensions: ['.md']
         }
@@ -57,7 +58,7 @@ function mdsvexPages(options) {
                 // Add imports and routes for all .md files.
                 files.forEach(function (file, index) {
                     let name = path.parse(file).name;
-                    
+
                     const metadata = matter(fs.readFileSync(path.resolve('src', actualOpts.docPath, file))).data
                     
                     imports += "import " + name + " from './" + actualOpts.docPath + "/" + file + "'; \n";
@@ -75,9 +76,53 @@ function mdsvexPages(options) {
                 );
 
                 // Add those set routes.
-                const addRoutes = newValue.replace('</script>', 
+                let addRoutes = newValue.replace('</script>', 
                     routes + '</script>'
                 );
+
+
+                if (actualOpts.hadSidebar) { 
+                    const styleID = Date.now();
+                    const sidebarJSON = JSON.parse(fs.readFileSync(path.resolve('src', 'sidebars.json')).toString());
+                    const categories = Object.keys(sidebarJSON.docs);
+                    const categoryRender = categories.map((category) => {
+                        
+                        const pages = sidebarJSON.docs[category];
+                        let dom = '';
+                        
+                        pages.forEach((page) => {
+                            dom += '<div>' + page + '</div>\n'
+                        })
+
+                        return (
+                            '<div>' + category + '</div>\n' + dom
+                        )
+                    })
+
+                    let rendered = '';
+                    categoryRender.forEach((category) => {
+                        rendered += category;
+                    })
+
+                
+                    const addSidebar = addRoutes.replace('<main', 
+                        '<div class="sidebar-wrapper-' + styleID + '" style="--bgColor:{\'black\'}; --textColor:{\'white\'}; --sidebarWidth:{\'300px\'};">\n' 
+                        + '<div class="sidebar-' + styleID + '">' +
+                        rendered +
+                        '</div>\n<div class="content-' + styleID + '">\n<main'
+                    )
+
+                    const endSidebar = addSidebar.replace('</main>', '</main>\n</div>\n</div>\n')
+
+                    addRoutes = endSidebar.replace('</style>',
+                        '.sidebar-wrapper-' + styleID + ' {width: 100%; display: flex; overflow: hidden;}\n' +
+                        '.sidebar-' + styleID + ' {color: var(--textColor); width: 300px; height: 100vh; position: fixed; top: 0; left: 0; background-color: var(--bgColor);}\n' +
+                        '.content-' + styleID + ' {flex-grow: 1; margin-left: calc(var(--sidebarWidth) + 10px); overflow: auto;}\n' +
+                        '</style>'
+                    )
+                }
+
+                // console.log(addRoutes);
 
                 return {
                     code: addRoutes,
@@ -88,13 +133,28 @@ function mdsvexPages(options) {
             if (fileName.includes(actualOpts.mdxvexOptions.extensions)) {
                 const metadata = matter(code).data;
                 let res = await mdsvex.compile(code, actualOpts.mdxvexOptions);
+                let headScript;
 
                 // Give the page a title.
                 if (has(metadata, 'title')) {
-                    res.code = "<svelte:head><title>" + metadata.title + "</title></svelte:head> \n" + res.code;
+                    headScript = "    import { onDestroy } from 'svelte';\n    const prevTitle = document.title;\n    document.title = '" + metadata.title + "';\n    onDestroy(() => {document.title = prevTitle;});\n";
                 } else {
-                    res.code = "<svelte:head><title>" + fileName.split('.')[0] + "</title></svelte:head> \n" + res.code;
+                    headScript = "    import { onDestroy } from 'svelte';\n    const prevTitle = document.title;\n    document.title = '" + fileName.split('.')[0] + "';\n    onDestroy(() => {document.title = prevTitle;});\n";
                 }
+
+                if (res.code.includes('<script>')) {
+                    if (res.code.includes("onDestroy(() => {")) {
+                        headScript = headScript.replace("    import { onDestroy } from 'svelte';\n    ", '');
+                        headScript = headScript.replace("});\n", '');
+                        res.code = res.code.replace('onDestroy(() => {', headScript)
+                    } else {
+                        res.code = res.code.replace('<script>', '<script>\n' + headScript);
+                    }
+                } else {
+                    res.code = '<script>\n' + headScript + '</script>\n' + res.code;
+                }
+                
+                // console.log(res.code);
 
                 return {
                     code: res.code,
