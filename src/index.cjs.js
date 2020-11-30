@@ -81,7 +81,7 @@ function mdsvexPages(options) {
                 );
 
 
-                if (actualOpts.hadSidebar) { 
+                if (actualOpts.hasSidebar) { 
                     const styleID = Date.now();
                     const sidebarJSON = JSON.parse(fs.readFileSync(path.resolve('src', 'sidebars.json')).toString());
                     const categories = Object.keys(sidebarJSON.docs);
@@ -104,7 +104,6 @@ function mdsvexPages(options) {
                         rendered += category;
                     })
 
-                
                     const addSidebar = addRoutes.replace('<main', 
                         '<div class="sidebar-wrapper-' + styleID + '" style="--bgColor:{\'black\'}; --textColor:{\'white\'}; --sidebarWidth:{\'300px\'};">\n' 
                         + '<div class="sidebar-' + styleID + '">' +
