@@ -12,10 +12,19 @@ function mdsvexPages(options) {
 
     // Default options for the plugin.
     const defaultOptions = {
-        appName: 'App.svelte',
-        docPath: 'docs',
-        hasSidebar: false,
-        mdxvexOptions: {
+        appName: 'App.svelte', // Path or filename of your main file with the Router component.
+        docPath: 'docs', // Path to the folder where all the .md files are.
+        hasSidebar: false, // I think this is pretty explanatory...
+        colors: { // Options to specify colors used in sidebar...
+            text: "black",
+            background: "white",
+            hover: "gray",
+        },
+        sidebarOptions: { // Options for width and breakpoint (to come).
+            width: "300px",
+            breakpoint: "700px"
+        },
+        mdxvexOptions: { // Extensions you want MDsveX to parse.
             extensions: ['.md']
         }
     }
@@ -52,6 +61,9 @@ function mdsvexPages(options) {
                 let imports = '';
                 const files = fs.readdirSync(path.resolve('src', actualOpts.docPath))
 
+                // Make style id, so you can't anticipate the names / overwrite them with globals.
+                const styleID = Date.now().toString().slice(-4);
+
                 // Create the routes string for adding to svelte-spa-router.
                 let routes = '';
                 
@@ -80,48 +92,155 @@ function mdsvexPages(options) {
                     routes + '</script>'
                 );
 
-
+                // Stuff for adding the sidebar
                 if (actualOpts.hasSidebar) { 
-                    const styleID = Date.now();
+
+                    // Start by parsing the sidebars.json file.
                     const sidebarJSON = JSON.parse(fs.readFileSync(path.resolve('src', 'sidebars.json')).toString());
                     const categories = Object.keys(sidebarJSON.docs);
+
+                    // Arrow SVG for the dropdowns.
+                    const arrowSVG = '<svg shape-rendering="geometricPrecision" width="24" height="24" viewBox="0 0 25 25"><path fill="' + actualOpts.colors.text + '" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>'
+                    
+                    // Define the categories.
                     const categoryRender = categories.map((category) => {
                         
                         const pages = sidebarJSON.docs[category];
                         let dom = '';
                         
                         pages.forEach((page) => {
-                            dom += '<div>' + page + '</div>\n'
+                            const pageRoute = has(page, 'route') ? page.route : page;
+                            const pageName = has(page, 'label') ? page.label : page;
+                            dom += '<a href="/#/docs/' + pageRoute + '" class="sidebar-category-item-'+ styleID + '">' + pageName + '</a>\n'
                         })
+                        
+                        const arrow  = '<span class:rotate-' + styleID + '={categories' + styleID + '["' + category + '"]} class="arrow-' + styleID + '">' + arrowSVG + '</span>'
 
                         return (
-                            '<div>' + category + '</div>\n' + dom
+                            '<div on:click={() => {categories' + styleID + '["' + category + '"] = !categories' + styleID + '["' + category + '"]}} class="sidebar-category-' + styleID + '">' + category + arrow + '</div>\n' + 
+                            '<div class="sidebar-category-items-'+ styleID + '" class:rotate-' + styleID + '={categories' + styleID + '["' + category + '"]}>' + dom + '</div>\n'
                         )
                     })
 
-                    let rendered = '';
-                    categoryRender.forEach((category) => {
-                        rendered += category;
+                    // Define category dropdown control object.
+                    let categoryControlObject = {};
+                    categories.forEach((category) => {
+                        categoryControlObject[category] = false;
                     })
-
-                    const addSidebar = addRoutes.replace('<main', 
-                        '<div class="sidebar-wrapper-' + styleID + '" style="--bgColor:{\'black\'}; --textColor:{\'white\'}; --sidebarWidth:{\'300px\'};">\n' 
-                        + '<div class="sidebar-' + styleID + '">' +
-                        rendered +
-                        '</div>\n<div class="content-' + styleID + '">\n<main'
+                    
+                    // Stick that in the file.
+                    addRoutes = addRoutes.replace('</script>', 'let categories' + styleID + ' = ' + JSON.stringify(categoryControlObject) + ';\n' +
+                        '$: console.log(categories' + styleID + ');\n</script>'
                     )
 
+                    // Dev stuff.
+                    // console.log(JSON.stringify(categoryControlObject));
+
+                    // Let the categories be rendered to HTML in their own wrapper.
+                    let rendered = '';
+                    categoryRender.forEach((category) => {
+                        rendered += '<div class="sidebar-category-wrapper-' + styleID + '">' + category + '</div>';
+                    })
+
+                    // New file code, adds all of our HTML.
+                    const addSidebar = addRoutes.replace('<main', 
+                        '<div class="sidebar-wrapper-' + styleID + '" style="--bgColor:{"' + actualOpts.colors.background + '"}; --textColor:{"' + actualOpts.colors.text + '"}; --sidebarWidth:{"' + actualOpts.sidebarOptions.width + '"};">\n' 
+                        + '<div class="sidebar-' + styleID + '">' + '<div class="sidebar-content-' + styleID + '">' +
+                        rendered +
+                        '</div>\n</div>\n<div class="content-' + styleID + '">\n<main'
+                    )
+
+                    // Finishes the sidebar. TODO: use much better RegEx
                     const endSidebar = addSidebar.replace('</main>', '</main>\n</div>\n</div>\n')
 
+                    // Styles for the sidebar. Will extract these sometime...
+                    const sidebarStyles = {
+                        ".sidebar-wrapper": [
+                            "width: 100%",
+                            "display: flex",
+                            "overflow: hidden",
+                            "text-rendering: geometricprecision"
+                        ],
+                        ".sidebar": [
+                            "color: var(--textColor)",
+                            "width: var(--sidebarWidth)",
+                            "height: 100vh",
+                            "position: fixed",
+                            "top: 0",
+                            "left: 0",
+                            "background-color: var(--bgColor)"
+                        ],
+                        ".sidebar-content": [
+                            "width: auto",
+                            "display: flex",
+                            "margin: 30px",
+                            "margin-top: 80px",
+                            "margin-left: 20px",
+                            "flex-direction: column",
+                            "align-items: flex-start",
+                            "padding-top: 20px",
+                            "padding-left: 10px",
+                            "border-top: 1px solid gray"
+                        ],
+                        ".sidebar-category": [
+                            "text-decoration: none",
+                            "font-size: 18px",
+                            "line-height: 1.2rem",
+                            "font-weight: 500",
+                            "width: 240px",
+                            "margin-bottom: 8px",
+                            "cursor: pointer"
+                        ],
+                        ".sidebar-category-wrapper": [
+                            "margin-bottom: 16px",
+                        ],
+                        ".sidebar-category-items": [
+                            "margin-left: 15px",
+                            "flex-direction: column",
+                            "display: none"
+                        ],
+                        ".sidebar-category-item": [
+                            "padding: 4px 0px",
+                            "text-decoration: none",
+                            "color: var(--textColor)",
+
+                        ],
+                        ".content": [
+                            "flex-grow: 1",
+                            "margin-left: calc(var(--sidebarWidth) + 10px)",
+                            "overflow: auto"
+                        ],
+                        ".arrow": [
+                            "float: right",
+                            "margin-right: 8px",
+                            "margin-top: -2px",
+                            "transform: rotate(90deg)",
+                            "transition: transform .2s linear"
+                        ],
+                        ".rotate": [
+                            "transform: rotate(180deg)"
+                        ],
+                        "div.rotate": [
+                            "display: flex",
+                            "transform: none"
+                        ]
+                    }
+
+                    // Make all the styles into actual CSS, injected into Svelte, so it handles some locality.
+                    const renderedStyle = Object.keys(sidebarStyles).map((key) => {
+                        return (
+                            key + '-' + styleID + '{' + sidebarStyles[key].join(';') + '}'
+                        )
+                    })
+
+                    // Put them all together!
                     addRoutes = endSidebar.replace('</style>',
-                        '.sidebar-wrapper-' + styleID + ' {width: 100%; display: flex; overflow: hidden;}\n' +
-                        '.sidebar-' + styleID + ' {color: var(--textColor); width: 300px; height: 100vh; position: fixed; top: 0; left: 0; background-color: var(--bgColor);}\n' +
-                        '.content-' + styleID + ' {flex-grow: 1; margin-left: calc(var(--sidebarWidth) + 10px); overflow: auto;}\n' +
-                        '</style>'
+                        renderedStyle.join('') + '</style>\n'
                     )
                 }
 
-                // console.log(addRoutes);
+                // Tell the user if their App.svelte was edited properly.
+                console.log("\u001b[1;32m" + actualOpts.docPath + " routes defined successfully");
 
                 return {
                     code: addRoutes,
@@ -130,6 +249,8 @@ function mdsvexPages(options) {
             }
             // Process the file if it is a MDsveX file.
             if (fileName.includes(actualOpts.mdxvexOptions.extensions)) {
+
+                // Parse the frontmatter.
                 const metadata = matter(code).data;
                 let res = await mdsvex.compile(code, actualOpts.mdxvexOptions);
                 let headScript;
@@ -141,19 +262,21 @@ function mdsvexPages(options) {
                     headScript = "    import { onDestroy } from 'svelte';\n    const prevTitle = document.title;\n    document.title = '" + fileName.split('.')[0] + "';\n    onDestroy(() => {document.title = prevTitle;});\n";
                 }
 
-                if (res.code.includes('<script>')) {
+                // Regex for making sure we don't override user code with our injections.
+                if (res.code.search(/<script(?!.*module).*>/ig) !== -1) {
                     if (res.code.includes("onDestroy(() => {")) {
                         headScript = headScript.replace("    import { onDestroy } from 'svelte';\n    ", '');
                         headScript = headScript.replace("});\n", '');
                         res.code = res.code.replace('onDestroy(() => {', headScript)
                     } else {
-                        res.code = res.code.replace('<script>', '<script>\n' + headScript);
+                        res.code = res.code.replace(/<script(?!.*module).*>/ig, '<script>\n' + headScript);
                     }
                 } else {
                     res.code = '<script>\n' + headScript + '</script>\n' + res.code;
                 }
                 
-                // console.log(res.code);
+                // Tell the user they got their .md files parsed correctly.
+                console.log("\u001b[0;32m" + fileName + " parsed successfully");
 
                 return {
                     code: res.code,
