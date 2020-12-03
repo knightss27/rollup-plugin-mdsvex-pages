@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const mdsvex = require('mdsvex');
 const matter = require('gray-matter');
+const gfm = require('remark-gfm');
+const config = require(path.resolve('src', 'mdp.config.js'))
 
 function mdsvexPages(options) {
     
@@ -15,6 +17,7 @@ function mdsvexPages(options) {
         appName: 'App.svelte', // Path or filename of your main file with the Router component.
         docPath: 'docs', // Path to the folder where all the .md files are.
         hasSidebar: false, // I think this is pretty explanatory...
+        hasNavbar: false,
         colors: { // Options to specify colors used in sidebar...
             text: "black",
             background: "white",
@@ -25,7 +28,8 @@ function mdsvexPages(options) {
             breakpoint: "700px"
         },
         mdxvexOptions: { // Extensions you want MDsveX to parse.
-            extensions: ['.md']
+            extensions: ['.md'],
+            remarkPlugins: [gfm]
         }
     }
 
@@ -47,6 +51,7 @@ function mdsvexPages(options) {
     return {
         name: 'mdsvex-pages',
         async transform(code, id) {
+            // this.addWatchFile(path.resolve('src', 'mdp.config.js'));
 
             // Establish path and filename for later usage.
             const fileName = path.win32.basename(id);
@@ -63,6 +68,7 @@ function mdsvexPages(options) {
 
                 // Make style id, so you can't anticipate the names / overwrite them with globals.
                 const styleID = Date.now().toString().slice(-4);
+                const withID = (className) => {return className+'-'+styleID}
 
                 // Create the routes string for adding to svelte-spa-router.
                 let routes = '';
@@ -95,30 +101,29 @@ function mdsvexPages(options) {
                 // Stuff for adding the sidebar
                 if (actualOpts.hasSidebar) { 
 
-                    // Start by parsing the sidebars.json file.
-                    const sidebarJSON = JSON.parse(fs.readFileSync(path.resolve('src', 'sidebars.json')).toString());
-                    const categories = Object.keys(sidebarJSON.docs);
+                    // Start by parsing the config file.
+                    const categories = Object.keys(config.docs);
 
                     // Arrow SVG for the dropdowns.
-                    const arrowSVG = '<svg shape-rendering="geometricPrecision" width="24" height="24" viewBox="0 0 25 25"><path fill="' + actualOpts.colors.text + '" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>'
+                    const arrowSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path fill="rgba(0,0,0,0.5)" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>'
                     
                     // Define the categories.
                     const categoryRender = categories.map((category) => {
                         
-                        const pages = sidebarJSON.docs[category];
+                        const pages = config.docs[category];
                         let dom = '';
                         
                         pages.forEach((page) => {
                             const pageRoute = has(page, 'route') ? page.route : page;
                             const pageName = has(page, 'label') ? page.label : page;
-                            dom += '<a href="/#/docs/' + pageRoute + '" class="sidebar-category-item-'+ styleID + '">' + pageName + '</a>\n'
+                            dom += '<li class="sidebar-category-item-li-' + styleID + '"><a class:active-' + styleID + '={$location.includes("' + pageRoute + '")} href="/#/docs/' + pageRoute + '" class="sidebar-category-item-'+ styleID + '">' + pageName + '</a></li>\n'
                         })
                         
                         const arrow  = '<span class:rotate-' + styleID + '={categories' + styleID + '["' + category + '"]} class="arrow-' + styleID + '">' + arrowSVG + '</span>'
 
                         return (
-                            '<div on:click={() => {categories' + styleID + '["' + category + '"] = !categories' + styleID + '["' + category + '"]}} class="sidebar-category-' + styleID + '">' + category + arrow + '</div>\n' + 
-                            '<div class="sidebar-category-items-'+ styleID + '" class:rotate-' + styleID + '={categories' + styleID + '["' + category + '"]}>' + dom + '</div>\n'
+                            '<li on:click={() => {categories' + styleID + '["' + category + '"] = !categories' + styleID + '["' + category + '"]}} class="sidebar-category-' + styleID + '">' + category + arrow + '</li>\n' + 
+                            '<ul class="sidebar-category-items-'+ styleID + '" class:rotate-' + styleID + '={categories' + styleID + '["' + category + '"]}>' + dom + '</ul>\n'
                         )
                     })
 
@@ -130,7 +135,7 @@ function mdsvexPages(options) {
                     
                     // Stick that in the file.
                     addRoutes = addRoutes.replace('</script>', 'let categories' + styleID + ' = ' + JSON.stringify(categoryControlObject) + ';\n' +
-                        '$: console.log(categories' + styleID + ');\n</script>'
+                        '$: console.log(categories' + styleID + ');\nimport { location } from "svelte-spa-router";\n</script>'
                     )
 
                     // Dev stuff.
@@ -139,15 +144,32 @@ function mdsvexPages(options) {
                     // Let the categories be rendered to HTML in their own wrapper.
                     let rendered = '';
                     categoryRender.forEach((category) => {
-                        rendered += '<div class="sidebar-category-wrapper-' + styleID + '">' + category + '</div>';
+                        rendered += '<li class="sidebar-category-li-' + styleID + '"><ul class="sidebar-category-wrapper-' + styleID + '">' + category + '</ul></li>';
                     })
+                    
+                    let navbarRendered = ''
+
+                    if (actualOpts.hasNavbar) {
+                        let navbarLinks = '';
+                        config.navbarLinks.forEach((navLink) => {
+                            const linkRoute = has(navLink, 'route') ? navLink.route : navLink;
+                            const linkName = has(navLink, 'label') ? navLink.label : navLink;
+                            navbarLinks += '<a href="/#/docs/' + linkRoute + '" class="' + withID('navbar-link') + '">' + linkName + '</a>'
+                        })
+
+                        let navbarBrand = '<h1 class="' + withID('navbar-brand') + '">' + config.navbarBrand + '</h1>'
+                        
+                        navbarRendered = '<nav class="' + withID('navbar') + '">' + '<div class="' + withID('navbar-content') + '">' + navbarBrand + navbarLinks + "</div></nav>";
+                    }
+                    
 
                     // New file code, adds all of our HTML.
-                    const addSidebar = addRoutes.replace('<main', 
-                        '<div class="sidebar-wrapper-' + styleID + '" style="--bgColor:{"' + actualOpts.colors.background + '"}; --textColor:{"' + actualOpts.colors.text + '"}; --sidebarWidth:{"' + actualOpts.sidebarOptions.width + '"};">\n' 
-                        + '<div class="sidebar-' + styleID + '">' + '<div class="sidebar-content-' + styleID + '">' +
+                    const addSidebar = addRoutes.replace('<main',
+                        navbarRendered +
+                        '<div class="' + withID('sidebar-wrapper') + '" style="--bgColor:{"' + actualOpts.colors.background + '"}; --textColor:{"' + actualOpts.colors.text + '"}; --textHoverColor:{"' + actualOpts.colors.hover + '"}; --sidebarWidth:{"' + actualOpts.sidebarOptions.width + '"};">\n' 
+                        + '<div class="' + withID('sidebar') + '">' + '<ul class="' + withID('sidebar-content') + '">' +
                         rendered +
-                        '</div>\n</div>\n<div class="content-' + styleID + '">\n<main'
+                        '</ul>\n</div>\n<div class="' + withID('content') + '">\n<main'
                     )
 
                     // Finishes the sidebar. TODO: use much better RegEx
@@ -168,68 +190,131 @@ function mdsvexPages(options) {
                             "position: fixed",
                             "top: 0",
                             "left: 0",
-                            "background-color: var(--bgColor)"
+                            "background-color: var(--bgColor)",
+                            "border-right: 1px solid black"
                         ],
                         ".sidebar-content": [
                             "width: auto",
                             "display: flex",
-                            "margin: 30px",
+                            "margin: 8px",
                             "margin-top: 80px",
-                            "margin-left: 20px",
                             "flex-direction: column",
                             "align-items: flex-start",
-                            "padding-top: 20px",
-                            "padding-left: 10px",
-                            "border-top: 1px solid gray"
+                            "list-style-type: none",
+                            "padding: 0px"
                         ],
                         ".sidebar-category": [
                             "text-decoration: none",
                             "font-size: 18px",
-                            "line-height: 1.2rem",
                             "font-weight: 500",
-                            "width: 240px",
-                            "margin-bottom: 8px",
-                            "cursor: pointer"
+                            "width: auto",
+                            "margin-bottom: 0px",
+                            "cursor: pointer",
+                            "display: flex",
+                            "border-radius: .25rem",
+                            "height: 32px",
+                            "justify-content: space-between",
+                            "align-items: center",
+                            "list-style-type: none",
+                            "padding: 6px 16px",
+                        ],
+                        ".sidebar-category:hover": [
+                            "background-color: #ebedf0"
+                        ],
+                        ".sidebar-category-li": [
+                            "width: 100%"
                         ],
                         ".sidebar-category-wrapper": [
-                            "margin-bottom: 16px",
+                            "margin-bottom: 4px",
+                            "width: 100%",
+                            "list-style-type: none",
+                            "padding: 0px",
                         ],
                         ".sidebar-category-items": [
-                            "margin-left: 15px",
-                            "flex-direction: column",
-                            "display: none"
+                            "margin-left: 16px",
+                            "display: none",
+                            "list-style-type: none",
+                            "padding: 0px",
+                        ],
+                        ".sidebar-category-item-li": [
+                            "list-style-type: none",
+                            "display: block",
+                            "width: auto",
+                        ],
+                        ".sidebar-category-item:hover": [
+                            "background-color: #ebedf0"
+                        ],
+                        ".active": [
+                            "background-color: #ebedf0"
                         ],
                         ".sidebar-category-item": [
-                            "padding: 4px 0px",
-                            "text-decoration: none",
+                            "border-radius: .25rem",
+                            "padding: 6px 16px",
                             "color: var(--textColor)",
-
+                            "margin: 0.25rem 0",
+                            "font-size: 16px",
+                            "text-decoration: none",
+                            "display: block"
                         ],
                         ".content": [
                             "flex-grow: 1",
                             "margin-left: calc(var(--sidebarWidth) + 10px)",
-                            "overflow: auto"
+                            "overflow: auto",
+                            "margin-top: 25px"
                         ],
                         ".arrow": [
                             "float: right",
                             "margin-right: 8px",
-                            "margin-top: -2px",
+                            "width: 32px",
+                            "height: 32px",
                             "transform: rotate(90deg)",
                             "transition: transform .2s linear"
                         ],
                         ".rotate": [
                             "transform: rotate(180deg)"
                         ],
-                        "div.rotate": [
-                            "display: flex",
+                        "ul.rotate": [
+                            "display: block",
                             "transform: none"
+                        ],
+                        ".navbar": [
+                            "display: flex",
+                            "flex-direction: row",
+                            "width: auto",
+                            "height: 60px",
+                            "padding: 8px 16px",
+                            "border-bottom: 1px solid black",
+                            "position: sticky",
+                            "top: 0",
+                            "z-index: 1000",
+                            "background: var(--bgColor)"
+                        ],
+                        ".navbar-brand": [
+                            "margin: 0px",
+                            "padding: 0px",
+                            "margin-right: 1rem"
+                        ],
+                        ".navbar-content": [
+                            "margin: 0px",
+                            "padding: 0px",
+                            "width: auto",
+                            "display: flex",
+                            "align-items: center",
+                            "flex: 1 1 0"
+                        ],
+                        ".navbar-link": [
+                            "margin: 0px",
+                            "padding: 4px 16px",
+                            "text-decoration: none",
+                            "color: var(--textColor)"
                         ]
                     }
 
                     // Make all the styles into actual CSS, injected into Svelte, so it handles some locality.
                     const renderedStyle = Object.keys(sidebarStyles).map((key) => {
+                        const pseudo = key.split(':').length !== 1 ? ':' + key.split(':')[1] : '';
                         return (
-                            key + '-' + styleID + '{' + sidebarStyles[key].join(';') + '}'
+                            key.split(':')[0] + '-' + styleID + pseudo + '{' + sidebarStyles[key].join(';') + '}'
                         )
                     })
 
@@ -241,6 +326,8 @@ function mdsvexPages(options) {
 
                 // Tell the user if their App.svelte was edited properly.
                 console.log("\u001b[1;32m" + actualOpts.docPath + " routes defined successfully");
+
+                // console.log(addRoutes)
 
                 return {
                     code: addRoutes,
