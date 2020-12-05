@@ -159,7 +159,7 @@ function mdsvexPages(options) {
 
                         let navbarBrand = '<h1 class="' + withID('navbar-brand') + '">' + config.navbarBrand + '</h1>'
                         
-                        navbarRendered = '<nav class="' + withID('navbar') + '">' + '<div class="' + withID('navbar-content') + '">' + navbarBrand + navbarLinks + "</div></nav>";
+                        navbarRendered = '<nav style="--bgColor:{"' + actualOpts.colors.background + '"}; --textColor:{"' + actualOpts.colors.text + '"}; --textHoverColor:{"' + actualOpts.colors.hover + '"}; --sidebarWidth:{"' + actualOpts.sidebarOptions.width + '"};" class="' + withID('navbar') + '">' + '<div class="' + withID('navbar-content') + '">' + navbarBrand + navbarLinks + "</div></nav>";
                     }
                     
 
