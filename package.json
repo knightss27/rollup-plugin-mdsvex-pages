@@ -4,8 +4,7 @@
   "description": "Markdown-based documentation/blog generator built with MDsveX.",
   "main": "src/index.cjs.js",
   "scripts": {
-    "test": "mdsvex-pages-test",
-    "buildCSS": "node -e \"require('./build').minifyStyles(1234)\""
+    "test": "mdsvex-pages-test"
   },
   "repository": {
     "type": "git",
