@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const mdsvex = require('mdsvex');
 const matter = require('gray-matter');
-const gfm = require('remark-gfm');
 const config = require(path.resolve('src', 'mdp.config.js'))
 
 function mdsvexPages(options) {
@@ -29,7 +28,6 @@ function mdsvexPages(options) {
         },
         mdxvexOptions: { // Extensions you want MDsveX to parse.
             extensions: ['.md'],
-            remarkPlugins: [gfm]
         }
     }
 
