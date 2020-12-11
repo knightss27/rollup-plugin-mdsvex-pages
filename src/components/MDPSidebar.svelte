@@ -5,9 +5,11 @@
 
     Object.keys(sidebar).forEach((route) => {
         Object.keys(sidebar[route]).forEach((category) => {
-            sidebar[route][category] = {
-                items: sidebar[route][category],
-                open: false,
+            if (category !== 'default-open') {
+                    sidebar[route][category] = {
+                    items: sidebar[route][category],
+                    open: sidebar[route]['default-open'].includes(category),
+                }
             }
         })
     })
@@ -18,23 +20,25 @@
         <div class="sidebar">
             <ul class="sidebar-content">
                 {#each Object.keys(sidebar[route]) as category}
+                    {#if category !== 'default-open'}
                     <li class="sidebar-category-li">
                         <ul class="sidebar-category-wrapper">
                             <li on:click={() => {sidebar[route][category].open = !sidebar[route][category].open}} class="sidebar-category">
                                 {category}
                                 <span class="arrow" class:rotate={sidebar[route][category].open}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path fill="rgba(0,0,0,0.5)" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>
                                 </span>
                             </li>
                             <ul class="sidebar-category-items" class:rotate={sidebar[route][category].open}>
                             {#each sidebar[route][category].items as link}
                                 <li class="sidebar-category-item-li">
-                                    <a class:active={$location.includes(link.route)} class="sidebar-category-item" href={'/#/' + route + '/' + link.route}>{link.label}</a>
+                                    <a class:active={link.route == "" ? $location.replaceAll('/', '') == route : $location.includes(link.route)} class="sidebar-category-item" href={'/#/' + route + '/' + link.route}>{link.label}</a>
                                 </li>
                             {/each}
                             </ul>
                         </ul>
                     </li>
+                    {/if}
                 {/each}
             </ul>
         </div>
@@ -45,10 +49,11 @@
 <style>
     .sidebar {
         color: var(--mdp-text-color);
-        width: var(--mdp-sidebar-width);
+        min-width: var(--mdp-sidebar-width);
         height: 100vh;
-        position: fixed;
-        top: var(--mdp-sidebar-margin-top);
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
         left: 0;
         background-color: var(--mdp-background-color);
         border-right: var(--mdp-sidebar-border);
@@ -117,6 +122,7 @@
         background-color: var(--mdp-sidebar-active);
     }
     .arrow {
+        fill: var(--mdp-text-color);
         float:right;
         margin-right:8px;
         width:32px;

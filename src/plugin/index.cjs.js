@@ -14,17 +14,6 @@ function mdsvexPages(options) {
     const defaultOptions = {
         appName: 'App.svelte', // Path or filename of your main file with the Router component.
         docPath: 'docs', // Path to the folder where all the .md files are.
-        hasSidebar: false, // I think this is pretty explanatory...
-        hasNavbar: false,
-        colors: { // Options to specify colors used in sidebar...
-            text: "black",
-            background: "white",
-            hover: "gray",
-        },
-        sidebarOptions: { // Options for width and breakpoint (to come).
-            width: "300px",
-            breakpoint: "700px"
-        },
         mdxvexOptions: { // Extensions you want MDsveX to parse.
             extensions: ['.md'],
         }
@@ -53,11 +42,34 @@ function mdsvexPages(options) {
     return {
         name: 'mdsvex-pages',
         async transform(code, id) {
-            const config = JSON.parse(fs.readFileSync(path.resolve('src', 'mdp.config.json')))
+
+            // Access the config file, if it actually exists.
+            let configFile;
+            try {
+                configFile = fs.readFileSync(path.resolve('src', 'mdp.config.json'));
+                configFile = JSON.parse(configFile);
+            } catch (err) {
+                if (err == 'ENOENT') {
+                    configFile = {};
+                } else if (err instanceof SyntaxError) {
+                    console.error("\u001b[1;31m" + '<-- Invalid JSON formatting in your mdp.config.json -->');
+                    throw err;
+                } else {
+                    throw err;
+                }
+                
+            }
+
+            const config = configFile;
             this.addWatchFile(path.resolve('src', 'mdp.config.json'));
 
             // Establish path and filename for later usage.
             const fileName = path.win32.basename(id);
+
+            // Warn you for not setting up the config!
+            if (fileName == 'MDPWrapper.svelte' && configFile == '{}') {
+                console.warn("If you are using the Wrapper component, please make sure to set up your mdp.config.json!")
+            }
 
             // Pass the navbar config
             if (fileName == 'MDPNavbar.svelte') {
@@ -90,7 +102,7 @@ function mdsvexPages(options) {
 
                 // Make style id, so you can't anticipate the names / overwrite them with globals.
                 const styleID = Date.now().toString().slice(-4);
-                const withID = (className) => {return className+'-'+styleID}
+                // const withID = (className) => {return className+'-'+styleID}
 
                 // Create the routes string for adding to svelte-spa-router.
                 let routes = '';
@@ -122,8 +134,6 @@ function mdsvexPages(options) {
 
                 // Tell the user if their App.svelte was edited properly.
                 console.log("\u001b[1;32m" + actualOpts.docPath + " routes defined successfully");
-
-                // console.log(addRoutes)
 
                 return {
                     code: addRoutes,

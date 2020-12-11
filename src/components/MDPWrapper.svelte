@@ -59,14 +59,13 @@
 <style>
     .content {
         flex-grow: 1;
-        margin-left: calc(var(--mdp-sidebar-width) + var(--mdp-content-sidebar-padding));
+        margin-left: calc(var(--mdp-content-sidebar-padding));
         overflow: auto;
         margin-top: 25px;
     }
     .mdp-wrapper {
-        width: 100%;
+        max-width: 100%;
         display: flex;
-        overflow: hidden;
         text-rendering: geometricprecision;
     }
 </style>
