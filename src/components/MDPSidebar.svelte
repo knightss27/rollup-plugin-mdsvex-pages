@@ -1,7 +1,9 @@
 <script>
+
     let sidebar = {};
     let categories = {};
     import { location } from 'svelte-spa-router'
+    import { beforeUpdate } from 'svelte';
 
     Object.keys(sidebar).forEach((route) => {
         Object.keys(sidebar[route]).forEach((category) => {
@@ -13,11 +15,46 @@
             }
         })
     })
+
+    export let condensed = false;
+    let condensedRef = condensed;
+
+    const setAllClosed = () => {
+        Object.keys(sidebar).forEach((route) => {
+            Object.keys(sidebar[route]).forEach((category) => {
+                if (category !== 'default-open') {
+                    if(sidebar[route][category].open) {
+                        sidebar[route][category].open = false;
+                    }
+                }
+            })
+        })
+    }
+
+    const setAllDefaults = () => {
+        Object.keys(sidebar).forEach((route) => {
+            Object.keys(sidebar[route]).forEach((category) => {
+                if (category !== 'default-open') {
+                    sidebar[route][category].open = sidebar[route]['default-open'].includes(category);
+                }
+            })
+        })
+    }
+
+    beforeUpdate(() => {
+        if (!condensedRef && condensed) {
+            setAllClosed();
+        } else if (condensedRef && !condensed) {
+            setAllDefaults();
+        }
+        condensedRef = condensed;
+    })
+    
 </script>
 
 {#each Object.keys(sidebar) as route}
     {#if $location.includes(route)}
-        <div class="sidebar">
+        <div class="sidebar" class:condensed>
             <ul class="sidebar-content">
                 {#each Object.keys(sidebar[route]) as category}
                     {#if category !== 'default-open'}
@@ -31,7 +68,7 @@
                             </li>
                             <ul class="sidebar-category-items" class:rotate={sidebar[route][category].open}>
                             {#each sidebar[route][category].items as link}
-                                <li class="sidebar-category-item-li">
+                                <li class="sidebar-category-item-li" on:click={() => {condensed ? sidebar[route][category].open = !sidebar[route][category].open : null}}>
                                     <a class:active={link.route == "" ? $location.replaceAll('/', '') == route : $location.includes(link.route)} class="sidebar-category-item" href={'/#/' + route + '/' + link.route}>{link.label}</a>
                                 </li>
                             {/each}
@@ -57,6 +94,12 @@
         left: 0;
         background-color: var(--mdp-background-color);
         border-right: var(--mdp-sidebar-border);
+    }
+    .sidebar.condensed {
+        min-width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: var(--mdp-sidebar-border);
     }
     .sidebar-content {
         width: auto;
