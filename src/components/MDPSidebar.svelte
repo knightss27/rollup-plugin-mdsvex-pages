@@ -69,7 +69,7 @@
                             <ul class="sidebar-category-items" class:rotate={sidebar[route][category].open}>
                             {#each sidebar[route][category].items as link}
                                 <li class="sidebar-category-item-li" on:click={() => {condensed ? sidebar[route][category].open = !sidebar[route][category].open : null}}>
-                                    <a class:active={link.route == "" ? $location.replaceAll('/', '') == route : $location.includes(link.route)} class="sidebar-category-item" href={'/#/' + route + '/' + link.route}>{link.label}</a>
+                                    <a class:active={link.route == "" ? $location.replace(/\//g, '') == route : $location.includes(link.route)} class="sidebar-category-item" href={'/#/' + route + '/' + link.route}>{link.label}</a>
                                 </li>
                             {/each}
                             </ul>

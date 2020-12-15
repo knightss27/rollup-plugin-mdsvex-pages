@@ -43,8 +43,8 @@
     })
 
     let screenWidth;
-    let breakpoint = Number.parseInt(actualStyles['sidebar-breakpoint'].replaceAll('px', ''));
-    let sidebarWidth = actualStyles['sidebar-width'].includes('px') ? Number.parseInt(actualStyles['sidebar-width'].replaceAll('px', '')) : null;
+    let breakpoint = Number.parseInt(actualStyles['sidebar-breakpoint'].replace(/px/g, ''));
+    let sidebarWidth = actualStyles['sidebar-width'].includes('px') ? Number.parseInt(actualStyles['sidebar-width'].replace(/px/g, '')) : null;
 
 </script>
 
