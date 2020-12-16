@@ -144,7 +144,7 @@ function mdsvexPages(options) {
                     // Tell the user if their App.svelte was edited properly.
                     console.log("\u001b[1;32m" + docPath + " routes defined successfully");
                 })
-                console.log(addRoutes);
+                
                 return {
                     code: addRoutes,
                     map: null
