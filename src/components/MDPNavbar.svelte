@@ -2,25 +2,26 @@
     let navbar = {};
     import { location } from 'svelte-spa-router'
 
+    const routes = Object.keys(navbar);
+    $: current = routes.indexOf($location.split('/')[1]);
+    $: console.log(routes);
 </script>
 
-{#each Object.keys(navbar) as route}
-    {#if $location.includes(route)}
-        <nav class="navbar">
-            <div class="navbar-content">
-                <div class="navbar-brand">
-                    {#if Object.keys(navbar[route]).includes('logo')}
-                    <img class="navbar-logo" alt={navbar[route].logo.alt} src={navbar[route].logo.src}/>
-                    {/if}
-                    {navbar[route].title}
-                </div>
-                {#each navbar[route].navbarLinks as link}
-                    <a href={'/#/' + route + '/' + link.route} class="navbar-link">{link.label}</a>
-                {/each}
+{#if current !== -1}
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                {#if Object.keys(navbar[routes[current]]).includes('logo')}
+                <img class="navbar-logo" alt={navbar[routes[current]].logo.alt} src={navbar[routes[current]].logo.src}/>
+                {/if}
+                {navbar[routes[current]].title}
             </div>
-        </nav>
-    {/if}
-{/each}
+            {#each navbar[routes[current]].navbarLinks as link}
+                <a href={'/#/' + routes[current] + '/' + link.route} class="navbar-link">{link.label}</a>
+            {/each}
+        </div>
+    </nav>
+{/if}
 
 
 <style>

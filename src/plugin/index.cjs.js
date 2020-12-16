@@ -13,7 +13,7 @@ function mdsvexPages(options) {
     // Default options for the plugin.
     const defaultOptions = {
         appName: 'App.svelte', // Path or filename of your main file with the Router component.
-        docPath: 'docs', // Path to the folder where all the .md files are.
+        docPath: ['docs'], // Path to the folder where all the .md files are.
         mdxvexOptions: { // Extensions you want MDsveX to parse.
             extensions: ['.md'],
         }
@@ -25,11 +25,16 @@ function mdsvexPages(options) {
     }
 
     // Compare both changed and default options to return one object with what is needed.
+    // I'm open to any options, even if they're not in my default :).
     function getOptions(opts) {
         var options = {};
   
         for (var opt in defaultOptions)
-            { options[opt] = opts && has(opts, opt) ? opts[opt] : defaultOptions[opt]; }
+            { options[opt] = opts 
+                && has(opts, opt) ? 
+                opts[opt] : 
+                defaultOptions[opt]; 
+            }
 
         return options
     }
@@ -73,8 +78,8 @@ function mdsvexPages(options) {
 
             // Pass the navbar config
             if (fileName == 'MDPNavbar.svelte') {
-                code = code.replace('</script>', 
-                'navbar = ' + JSON.stringify(config.navbar) + '\n</script>'
+                code = code.replace('let navbar = {};', 
+                'let navbar = ' + JSON.stringify(config.navbar) + ';\n'
                 )
                 return {
                     code,
@@ -96,45 +101,50 @@ function mdsvexPages(options) {
             // Only edit the main App.svelte file
             if (fileName == actualOpts.appName) {
                 
-                // Establish imports string and locations of .md files.
-                let imports = '';
-                const files = fs.readdirSync(path.resolve('src', actualOpts.docPath))
-
-                // Make style id, so you can't anticipate the names / overwrite them with globals.
-                const styleID = Date.now().toString().slice(-4);
-                // const withID = (className) => {return className+'-'+styleID}
-
-                // Create the routes string for adding to svelte-spa-router.
-                let routes = '';
-                
-                // Add imports and routes for all .md files.
-                files.forEach(function (file, index) {
-                    let name = path.parse(file).name;
-
-                    const metadata = matter(fs.readFileSync(path.resolve('src', actualOpts.docPath, file))).data
+                let addRoutes = code;
+                actualOpts.docPath.forEach((docPath) => {
+                    console.log(docPath, 'DOCPATH')
+                    // Establish imports string and locations of .md files.
+                    let imports = '';
                     
-                    imports += "import " + name + " from './" + actualOpts.docPath + "/" + file + "'; \n";
+                    const files = fs.readdirSync(path.resolve('src',docPath))
 
-                    if (has(metadata, 'id') && metadata.id !== name) {
-                        name = metadata.id;
-                    }
+                    // Make style id, so you can't anticipate the names / overwrite them with globals.
+                    const styleID = Date.now().toString().slice(-4);
+                    // const withID = (className) => {return className+'-'+styleID}
 
-                    routes += "routes.set('/" + actualOpts.docPath + "/" + name + "', " + path.parse(file).name + ");\n" 
+                    // Create the routes string for adding to svelte-spa-router.
+                    let routes = '';
+                    
+                    // Add imports and routes for all .md files.
+                    files.forEach(function (file, index) {
+                        let name = path.parse(file).name;
+
+                        const metadata = matter(fs.readFileSync(path.resolve('src', docPath, file))).data
+                        
+                        imports += "import " + name + docPath + " from './" + docPath + "/" + file + "'; \n";
+
+                        if (has(metadata, 'id') && metadata.id !== name) {
+                            name = metadata.id;
+                        }
+
+                        routes += "routes.set('/" + docPath + "/" + name + "', " + path.parse(file).name + docPath + ");\n" 
+                    })
+
+                    // Add those imports.
+                    const newValue = addRoutes.replace('<script>', 
+                        '<script>\n//--mdLoader-- \n' + imports + '//--mdLoader--'
+                    );
+
+                    // Add those set routes.
+                    addRoutes = newValue.replace('</script>', 
+                        routes + '</script>'
+                    );
+
+                    // Tell the user if their App.svelte was edited properly.
+                    console.log("\u001b[1;32m" + docPath + " routes defined successfully");
                 })
-
-                // Add those imports.
-                const newValue = code.replace('<script>', 
-                    '<script>\n//--mdLoader-- \n' + imports + '//--mdLoader--'
-                );
-
-                // Add those set routes.
-                let addRoutes = newValue.replace('</script>', 
-                    routes + '</script>'
-                );
-
-                // Tell the user if their App.svelte was edited properly.
-                console.log("\u001b[1;32m" + actualOpts.docPath + " routes defined successfully");
-
+                console.log(addRoutes);
                 return {
                     code: addRoutes,
                     map: null

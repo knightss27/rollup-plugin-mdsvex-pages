@@ -1,7 +1,6 @@
 <script>
 
     let sidebar = {};
-    let categories = {};
     import { location } from 'svelte-spa-router'
     import { beforeUpdate } from 'svelte';
 
@@ -49,38 +48,39 @@
         }
         condensedRef = condensed;
     })
-    
+
+    const routes = Object.keys(sidebar);
+    $: current = routes.indexOf($location.split('/')[1]);
+
 </script>
 
-{#each Object.keys(sidebar) as route}
-    {#if $location.includes(route)}
-        <div class="sidebar" class:condensed>
-            <ul class="sidebar-content">
-                {#each Object.keys(sidebar[route]) as category}
-                    {#if category !== 'default-open'}
-                    <li class="sidebar-category-li">
-                        <ul class="sidebar-category-wrapper">
-                            <li on:click={() => {sidebar[route][category].open = !sidebar[route][category].open}} class="sidebar-category">
-                                {category}
-                                <span class="arrow" class:rotate={sidebar[route][category].open}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>
-                                </span>
+{#if current !== -1}
+    <div class="sidebar" class:condensed>
+        <ul class="sidebar-content">
+            {#each Object.keys(sidebar[routes[current]]) as category}
+                {#if category !== 'default-open'}
+                <li class="sidebar-category-li">
+                    <ul class="sidebar-category-wrapper">
+                        <li on:click={() => {sidebar[routes[current]][category].open = !sidebar[routes[current]][category].open}} class="sidebar-category">
+                            {category}
+                            <span class="arrow" class:rotate={sidebar[routes[current]][category].open}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>
+                            </span>
+                        </li>
+                        <ul class="sidebar-category-items" class:rotate={sidebar[routes[current]][category].open}>
+                        {#each sidebar[routes[current]][category].items as link}
+                            <li class="sidebar-category-item-li" on:click={() => {condensed ? sidebar[routes[current]][category].open = !sidebar[routes[current]][category].open : null}}>
+                                <a class:active={link.route == "" ? $location.replace(/\//g, '') == routes[current] : $location.includes(link.route)} class="sidebar-category-item" href={'/#/' + routes[current] + '/' + link.route}>{link.label}</a>
                             </li>
-                            <ul class="sidebar-category-items" class:rotate={sidebar[route][category].open}>
-                            {#each sidebar[route][category].items as link}
-                                <li class="sidebar-category-item-li" on:click={() => {condensed ? sidebar[route][category].open = !sidebar[route][category].open : null}}>
-                                    <a class:active={link.route == "" ? $location.replace(/\//g, '') == route : $location.includes(link.route)} class="sidebar-category-item" href={'/#/' + route + '/' + link.route}>{link.label}</a>
-                                </li>
-                            {/each}
-                            </ul>
+                        {/each}
                         </ul>
-                    </li>
-                    {/if}
-                {/each}
-            </ul>
-        </div>
-    {/if}
-{/each}
+                    </ul>
+                </li>
+                {/if}
+            {/each}
+        </ul>
+    </div>
+{/if}
 
 
 <style>
