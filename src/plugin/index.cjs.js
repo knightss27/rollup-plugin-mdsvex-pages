@@ -21,7 +21,7 @@ function mdsvexPages(options) {
 
     // Check if the object has a property.
     function has(obj, propName) {
-        return hasOwnProperty.call(obj, propName)
+        return Object.prototype.hasOwnProperty.call(obj, propName)
     }
 
     // Compare both changed and default options to return one object with what is needed.

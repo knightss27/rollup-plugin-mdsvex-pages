@@ -16,7 +16,7 @@
                 {/if}
                 {navbar[routes[current]].title}
             </div>
-            {#each navbar[routes[current]].navbarLinks as link}
+            {#each navbar[routes[current]].links as link}
                 <a href={'/#/' + routes[current] + '/' + link.route} class="navbar-link">{link.label}</a>
             {/each}
         </div>
