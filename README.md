@@ -62,7 +62,7 @@ In your App.svelte (or equivalent). Again, this is already set up in this repo.
 
 ```svelte
 <script>
-  import Router from 'svelte-spa-router'
+  import Router from 'svelte-spa-router';
   const routes = new Map();
 </script>
 
@@ -77,7 +77,7 @@ In your App.svelte (or equivalent). Again, this is already set up in this repo.
 
 Once this is set up, feel free to add as many .md pages to their folder as you'd like.
 
-Additionally, you can turn on the (very much experimental) sidebar and/or navbar to your page. Currently, this appears on every route, but soon there will be an option to have these only show up on the routes of your choice. Additionally, you can turn off either one of the components and replace them with your own if you'd like. This is all set through a new `mdp.config.json file`, which can be configured in your src directory. The file can be set up as so:
+Additionally, you can turn on the (very much experimental) sidebar and/or navbar to your page. These are mostly mobile responsive, and come with varying degrees of customization. Additionally, you can turn off either one of the components and replace them with your own if you'd like, or only show them on specific routes. This is all set through a new `mdp.config.json file`, which can be configured in your src directory. The file can be set up as so:
 
 ```js
 //mdp.config.json
@@ -104,4 +104,21 @@ Additionally, you can turn on the (very much experimental) sidebar and/or navbar
     }
   }
 }
+```
 
+And in your App.svelte (or equivalent) you can import the wrapper for the components.
+
+```svelte
+<script>
+  import MDPWrapper from 'rollup-plugin-mdsvex-pages/src/components/MDPWrapper.svelte';
+  import Router from 'svelte-spa-router';
+  const routes = new Map();
+</script>
+
+<MDPWrapper>
+  <main>
+    <h1>Hello from mdsvex-pages!</h1>
+    <Router {routes} />
+  </main>
+</MDPWrapper>
+```
