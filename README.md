@@ -2,9 +2,8 @@
 
 Markdown-based documentation/blog generator built with [MDsveX](https://mdsvex.com/).
 <br>
-Currently supports [svelte-spa-router](https://github.com/ItalyPaleAle/svelte-spa-router) and [Sapper](https://sapper.svelte.dev/) (coming soon).
+Built for use with [svelte-spa-router](https://github.com/ItalyPaleAle/svelte-spa-router).
 <br>
-This is a sort of template repo, if you want to try implementing the rollup plugin yourself, see [rollup-plugin-mdsvex-pages](https://github.com/knightss27/rollup-plugin-mdsvex-pages).
 
 ---
 # How it works
@@ -25,7 +24,7 @@ Assuming your svelte project tree looks similar to:
 
 mdsvex-pages will automatically generate [svelte-spa-router](https://github.com/ItalyPaleAle/svelte-spa-router) routes and convert the markdown files into parseable svelte files to be bundled. (using MDsveX's [compile](https://mdsvex.com/docs#use-it) function)
 
-Because mdsvex-pages uses MDsveX, you can write valid Svelte code in the .md files. Additionally, I currently use .md files as the basis as that was what I wanted to parse for my own original usage, but options allow you to change this extension to `.svx` (as used by MDsveX in their docs) or `.anything`, so you can use whatever extension you prefer. 
+Because mdsvex-pages uses MDsveX, you can write valid Svelte code in the .md files. The program currently uses .md files as the default, as that was what I wanted to parse for my own original usage, but options allow you to change this extension to `.svx` (as used by MDsveX in their docs) or `.anything`, so you can use whatever extension you prefer. 
 
 ---
 # Setup
@@ -46,7 +45,7 @@ export default {
 plugins: [
   mdsvexPages({
     appName: 'App.svelte' // Path of the central svelte file, should include your Router component. Assumes you are in /src.
-    docPath: 'docs' // Path of the .md pages folder. Assumes you are in /src.
+    docPath: ['docs'] // Path of the .md pages folder. Assumes you are in /src and can take multiple routes.
     mdsvexOptions: { //You can configure any of the mdsvexOptions, and they will be passed to mdsvex.
       extensions: ['.md'] 
     }
@@ -88,7 +87,8 @@ Additionally, you can turn on the (very much experimental) sidebar and/or navbar
     "docs": { // This represents the route the sidebar should show up on.
       "Category Name": [ // Category name, text next to the dropdown.
         {"route": "page-id", "label": "My Page"} // A sidebar item, route for page id relative to the sidebar route.
-      ]
+      ],
+      "default-open": ["Getting Started"] // Allows the sidebar to have these categories open by default, must use the same string as you did for the category.
     }
   },
   "navbar": { // All options for the navbar are stored in this object.
