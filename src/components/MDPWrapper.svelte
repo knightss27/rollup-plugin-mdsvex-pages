@@ -66,9 +66,9 @@
 <style>
     .content {
         flex-grow: 1;
-        margin-left: calc(var(--mdp-content-sidebar-padding));
+        margin-left: 0px;
         overflow: auto;
-        margin-top: 25px;
+        /* margin-top: 25px; */
     }
     .content.condensed {
         max-width: calc(100% - var(--mdp-content-sidebar-padding));

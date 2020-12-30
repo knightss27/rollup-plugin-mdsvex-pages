@@ -94,6 +94,7 @@
         left: 0;
         background-color: var(--mdp-background-color);
         border-right: var(--mdp-sidebar-border);
+        margin-right: calc(var(--mdp-content-sidebar-padding));
     }
     .sidebar.condensed {
         min-width: 100%;
