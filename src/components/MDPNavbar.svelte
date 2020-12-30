@@ -14,11 +14,15 @@
                 {#if Object.keys(navbar[routes[current]]).includes('logo')}
                 <img class="navbar-logo" alt={navbar[routes[current]].logo.alt} src={navbar[routes[current]].logo.src}/>
                 {/if}
+                {#if Object.keys(navbar[routes[current]]).includes('title')}
                 {navbar[routes[current]].title}
+                {/if}
             </div>
+            {#if Object.keys(navbar[routes[current]]).includes('links')}
             {#each navbar[routes[current]].links as link}
                 <a href={'/#/' + routes[current] + '/' + link.route} class="navbar-link">{link.label}</a>
             {/each}
+            {/if}
         </div>
     </nav>
 {/if}

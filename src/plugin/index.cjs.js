@@ -13,7 +13,7 @@ function mdsvexPages(options) {
     // Default options for the plugin.
     const defaultOptions = {
         appName: 'App.svelte', // Path or filename of your main file with the Router component.
-        docPath: ['docs'], // Path to the folder where all the .md files are.
+        paths: ['docs'], // Path to the folder(s) where all the .md files are.
         mdxvexOptions: { // Extensions you want MDsveX to parse.
             extensions: ['.md'],
         }
@@ -102,8 +102,9 @@ function mdsvexPages(options) {
             if (fileName == actualOpts.appName) {
                 
                 let addRoutes = code;
-                actualOpts.docPath.forEach((docPath) => {
-                    console.log(docPath, 'DOCPATH')
+                actualOpts.paths.forEach((docPath) => {
+                    // console.log(docPath, 'DOCPATH')
+                    
                     // Establish imports string and locations of .md files.
                     let imports = '';
                     
@@ -127,8 +128,12 @@ function mdsvexPages(options) {
                         if (has(metadata, 'id') && metadata.id !== name) {
                             name = metadata.id;
                         }
-
-                        routes += "routes.set('/" + docPath + "/" + name + "', " + path.parse(file).name + docPath + ");\n" 
+                        
+                        if (code.includes('const routes = {')) {
+                            routes += "'/" + docPath + "/" + name + "': " + path.parse(file).name + docPath + ",\n"
+                        } else {
+                            routes += "routes.set('/" + docPath + "/" + name + "', " + path.parse(file).name + docPath + ");\n" 
+                        }
                     })
 
                     // Add those imports.
@@ -137,9 +142,16 @@ function mdsvexPages(options) {
                     );
 
                     // Add those set routes.
-                    addRoutes = newValue.replace('</script>', 
-                        routes + '</script>'
-                    );
+                    if (code.includes('const routes = {')) {
+                        // console.log('USING OLD ROUTER')
+                        addRoutes = newValue.replace('const routes = {', 
+                            'const routes = {\n' + routes
+                        );
+                    } else {
+                        addRoutes = newValue.replace('</script>', 
+                            routes + '</script>'
+                        );
+                    }
 
                     // Tell the user if their App.svelte was edited properly.
                     console.log("\u001b[1;32m" + docPath + " routes defined successfully");
