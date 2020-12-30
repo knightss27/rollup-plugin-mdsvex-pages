@@ -37,7 +37,8 @@
         padding: 8px 16px;
         border-bottom: var(--mdp-navbar-border);
         box-shadow: var(--mdp-navbar-box-shadow);
-        position: sticky;
+        position: relative;
+        width: 100%;
         top: 0;
         background: var(--mdp-background-color);
         z-index: 1000;
