@@ -80,6 +80,6 @@
     }
     .mdp-wrapper.condensed {
         flex-direction: column;
-        align-items: center;
+        /* align-items: center; */
     }
 </style>
