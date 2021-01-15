@@ -1,6 +1,6 @@
 # mdsvex-pages
 
-Markdown-based documentation/blog generator built with [MDsveX](https://mdsvex.com/).
+Markdown-based documentation/blog generator built with [MDsveX](https://mdsvex.com/). (WIP)
 <br>
 Built for use with [svelte-spa-router](https://github.com/ItalyPaleAle/svelte-spa-router).
 <br>
