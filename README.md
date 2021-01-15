@@ -76,7 +76,7 @@ In your App.svelte (or equivalent). Again, this is already set up in this repo.
 Once this is set up, feel free to add as many .md pages to their folder as you'd like.
 Markdown pages support frontmatter, and take these fields:
 
-```md
+```
 ---
 id: page-id     // The route to this page, defaults to the name of the file.
 title: README   // Will show as the title of the site when on this page.
