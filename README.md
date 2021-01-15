@@ -74,6 +74,14 @@ In your App.svelte (or equivalent). Again, this is already set up in this repo.
 ```
 
 Once this is set up, feel free to add as many .md pages to their folder as you'd like.
+Markdown pages support frontmatter, and take these fields:
+
+```md
+---
+id: page-id     // The route to this page, defaults to the name of the file.
+title: README   // Will show as the title of the site when on this page.
+---
+```
 
 Additionally, you can turn on the (very much experimental) sidebar and/or navbar to your page. These are mostly mobile responsive, and come with varying degrees of customization. Additionally, you can turn off either one of the components and replace them with your own if you'd like, or only show them on specific routes. This is all set through a new `mdp.config.json file`, which can be configured in your src directory. The file can be set up as so:
 
