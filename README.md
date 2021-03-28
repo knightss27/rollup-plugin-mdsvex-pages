@@ -94,7 +94,7 @@ Additionally, you can turn on the (very much experimental) sidebar and/or navbar
       "Category Name": [ // Category name, text next to the dropdown.
         {"route": "page-id", "label": "My Page"}, // A sidebar item, route for page id relative to the sidebar route.
         {"route": "", "label": "Homepage"} // Allows for a default homepage on the /docs route.
-        // **IMPORTANT** if you want a .md file to load on the homepage, please set it's front-matter 'id' to .
+        // **IMPORTANT** if you want a .md file to load on the homepage, please set its front-matter 'id' to .
         // If you instead want your own Svelte component on the homepage, simply add a route in your router for "/docs"
       ],
       "default-open": ["Category Name"] // Allows the sidebar to have these categories open by default.
