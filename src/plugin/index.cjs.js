@@ -1,4 +1,4 @@
-'use strict';
+'use strict'; // v1.2.13
 
 const fs = require('fs');
 const path = require('path');
@@ -127,6 +127,9 @@ function mdsvexPages(options) {
 
                         if (has(metadata, 'id') && metadata.id !== name) {
                             name = metadata.id;
+                            if (name === ".") {
+                                name = "";
+                            }
                         }
                         
                         if (code.includes('const routes = {')) {
