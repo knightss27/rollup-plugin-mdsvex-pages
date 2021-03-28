@@ -92,9 +92,13 @@ Additionally, you can turn on the (very much experimental) sidebar and/or navbar
   "sidebar": { // All options for the sidebar are stored in this object.
     "docs": { // This represents the route the sidebar should show up on.
       "Category Name": [ // Category name, text next to the dropdown.
-        {"route": "page-id", "label": "My Page"} // A sidebar item, route for page id relative to the sidebar route.
+        {"route": "page-id", "label": "My Page"}, // A sidebar item, route for page id relative to the sidebar route.
+        {"route": "", "label": "Homepage"} // Allows for a default homepage on the /docs route.
+        // **IMPORTANT** if you want a .md file to load on the homepage, please set it's front-matter 'id' to .
+        // If you instead want your own Svelte component on the homepage, simply add a route in your router for "/docs"
       ],
-      "default-open": ["Getting Started"] // Allows the sidebar to have these categories open by default, must use the same string as you did for the category.
+      "default-open": ["Category Name"] // Allows the sidebar to have these categories open by default.
+      // This must use the same string as you did for the category. Always needs to exist, but can be empty array.
     }
   },
   "navbar": { // All options for the navbar are stored in this object.
