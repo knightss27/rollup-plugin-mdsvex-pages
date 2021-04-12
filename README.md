@@ -45,7 +45,7 @@ export default {
 plugins: [
   mdsvexPages({
     appName: 'App.svelte' // Path of the central svelte file, should include your Router component. Assumes you are in /src.
-    docPath: ['docs'] // Path of the .md pages folder. Assumes you are in /src and can take multiple routes.
+    paths: ['docs'] // Path of the .md pages folder. Assumes you are in /src and can take multiple routes.
     mdsvexOptions: { //You can configure any of the mdsvexOptions, and they will be passed to mdsvex.
       extensions: ['.md'] 
     }
