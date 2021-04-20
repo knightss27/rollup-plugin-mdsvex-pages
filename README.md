@@ -64,7 +64,7 @@ In your App.svelte (or equivalent). Again, this is already set up in this repo.
 <script>
   import Router from 'svelte-spa-router';
   const routes = new Map();
-  //Alternatively: const routes = {};
+  // Alternatively: const routes = {};
 </script>
 
 <main>
@@ -104,13 +104,18 @@ Additionally, you can turn on the (very much experimental) sidebar and/or navbar
   "navbar": { // All options for the navbar are stored in this object.
     "docs": { // This represents the route the navbar should show up on.
       "links": [ // Links to show up on the navbar.
-        {"route": "page-id", "label": "My Page"}
+        // route can be relative, or if you include an global attribute set to true, it can link directly to whatever route you specify
+        // the global attribute is optional, and is passed directly to the href attribute of the link 
+        {"route": "page-id", "label": "My Page", "global": true}
       ],
       "title": "My Title", // Title for your navbar brand.
       "logo": { // Logo for your navbar brand.
         "alt": "Site Logo",
         "src": "img.png" // src is passed to the img src attribute.
       }
+      // optional brand-link will override where the navbar title/logo *href* will link to
+      // by default, it goes to `/#/docs' (your route for the navbar specified above)
+      "brand-link": "https://my-site.com/"
     }
   }
 }

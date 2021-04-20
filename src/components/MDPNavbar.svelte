@@ -4,23 +4,26 @@
 
     const routes = Object.keys(navbar);
     $: current = routes.indexOf($location.split('/')[1]);
-    $: console.log(routes);
 </script>
 
 {#if current !== -1}
     <nav class="navbar">
         <div class="navbar-content">
-            <div class="navbar-brand">
+            <a class="navbar-brand" href={navbar[routes[current]]["brand-link"] ? navbar[routes[current]]["brand-link"] : `/#/${routes[current]}`}>
                 {#if Object.keys(navbar[routes[current]]).includes('logo')}
                 <img class="navbar-logo" alt={navbar[routes[current]].logo.alt} src={navbar[routes[current]].logo.src}/>
                 {/if}
                 {#if Object.keys(navbar[routes[current]]).includes('title')}
                 {navbar[routes[current]].title}
                 {/if}
-            </div>
+            </a>
             {#if Object.keys(navbar[routes[current]]).includes('links')}
             {#each navbar[routes[current]].links as link}
-                <a href={'/#/' + routes[current] + '/' + link.route} class="navbar-link">{link.label}</a>
+                {#if link.global}
+                    <a href={link.route} class="navbar-link">{link.label}</a>
+                {:else}
+                    <a href={'/#/' + routes[current] + '/' + link.route} class="navbar-link">{link.label}</a>
+                {/if}
             {/each}
             {/if}
         </div>
