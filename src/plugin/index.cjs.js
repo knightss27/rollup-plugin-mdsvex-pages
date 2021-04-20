@@ -1,4 +1,4 @@
-'use strict'; // v1.2.13
+'use strict'; // v1.2.14
 
 const fs = require('fs');
 const path = require('path');
@@ -167,6 +167,9 @@ function mdsvexPages(options) {
             }
             // Process the file if it is a MDsveX file.
             if (fileName.includes(actualOpts.mdxvexOptions.extensions)) {
+                
+                // Add this file to watch so you can hot-reload your markdown files
+                this.addWatchFile(path.resolve(fileName));
 
                 // Parse the frontmatter.
                 const metadata = matter(code).data;
