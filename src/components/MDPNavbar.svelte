@@ -55,6 +55,8 @@
         display: flex;
         align-items: center;
         height: 2rem;
+        text-decoration: none;
+        color: var(--mdp-text-color);
     }
     .navbar-logo {
         display: block;
@@ -77,4 +79,3 @@
         color: var(--mdp-text-color);
     }
 </style>
-
