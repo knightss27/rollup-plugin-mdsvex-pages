@@ -140,9 +140,11 @@ function mdsvexPages(options) {
                     })
 
                     // Add those imports.
-                    const newValue = addRoutes.replace('<script>', 
-                        '<script>\n//--mdLoader-- \n' + imports + '//--mdLoader--'
-                    );
+                    const newValue = addRoutes.replace(/<script.*(?=>)/g, (match) => {
+                        return (
+                            `${match}>\n//--mdLoader-- \n` + imports + '//--mdLoader--'
+                        )
+                    });
 
                     // Add those set routes.
                     if (code.includes('const routes = {')) {
