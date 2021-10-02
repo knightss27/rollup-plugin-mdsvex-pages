@@ -45,7 +45,7 @@ function mdsvexPages(options) {
     // const config = require(path.resolve('src', 'mdp.config.js'));
 
     // Pages stores a list of pages with id, title, subtitle, and date
-    let pages = new Map();
+    let pages = {};
 
     return {
         name: 'mdsvex-pages',
@@ -181,11 +181,12 @@ function mdsvexPages(options) {
                 const metadata = matter(code).data;
 
                 // Add pages entry
-                pages.set(metadata.id, {
+                pages[metadata.id] = {
+                    id: metadata.id,
                     title: metadata.title,
                     subtitle: metadata.subtitle,
                     date: metadata.date
-                })
+                }
 
                 let res = await mdsvex.compile(code, actualOpts.mdsvexOptions);
                 let headScript;
