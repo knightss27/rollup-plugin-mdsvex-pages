@@ -137,3 +137,5 @@ And in your App.svelte (or equivalent) you can import the wrapper for the compon
   </main>
 </MDPWrapper>
 ```
+
+Rollup will also generate a `src/mdp-meta.js` file containing a single exported `pages` list of objects containing the `id`, `title`, `date`, and `subtitle` of each page.

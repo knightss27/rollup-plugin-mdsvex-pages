@@ -25,10 +25,10 @@
   "homepage": "https://github.com/knightss27/rollup-plugin-mdsvex-pages#readme",
   "dependencies": {
     "gray-matter": "^4.0.2",
-    "mdsvex": "^0.9.7"
+    "mdsvex": "^0.9.7",
+    "svelte": "3.x"
   },
   "peerDependencies": {
-    "svelte": "3.x",
     "svelte-spa-router": "^3.x"
   }
 }
