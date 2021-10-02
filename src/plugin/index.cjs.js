@@ -44,7 +44,7 @@ function mdsvexPages(options) {
 
     // const config = require(path.resolve('src', 'mdp.config.js'));
 
-    // Pages stores a list of pages with id, title, and subtitle
+    // Pages stores a list of pages with id, title, subtitle, and date
     let pages = [];
 
     return {
@@ -183,7 +183,8 @@ function mdsvexPages(options) {
                 pages.push({
                     id: metadata.id,
                     title: metadata.title,
-                    subtitle: metadata.subtitle
+                    subtitle: metadata.subtitle,
+                    date: metadata.date
                 })
 
                 let res = await mdsvex.compile(code, actualOpts.mdxvexOptions);
