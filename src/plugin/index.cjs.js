@@ -1,4 +1,4 @@
-'use strict'; // v1.2.14
+'use strict'; // v1.2.19
 
 const fs = require('fs');
 const path = require('path');
@@ -14,7 +14,7 @@ function mdsvexPages(options) {
     const defaultOptions = {
         appName: 'App.svelte', // Path or filename of your main file with the Router component.
         paths: ['docs'], // Path to the folder(s) where all the .md files are.
-        mdxvexOptions: { // Extensions you want MDsveX to parse.
+        mdsvexOptions: { // Extensions you want MDsveX to parse.
             extensions: ['.md'],
         }
     }
@@ -172,7 +172,7 @@ function mdsvexPages(options) {
                 }
             }
             // Process the file if it is a MDsveX file.
-            if (fileName.includes(actualOpts.mdxvexOptions.extensions)) {
+            if (fileName.includes(actualOpts.mdsvexOptions.extensions)) {
                 
                 // Add this file to watch so you can hot-reload your markdown files
                 this.addWatchFile(path.resolve(fileName));
@@ -188,7 +188,7 @@ function mdsvexPages(options) {
                     date: metadata.date
                 })
 
-                let res = await mdsvex.compile(code, actualOpts.mdxvexOptions);
+                let res = await mdsvex.compile(code, actualOpts.mdsvexOptions);
                 let headScript;
 
                 // Give the page a title.
