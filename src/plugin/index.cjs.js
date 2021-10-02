@@ -193,9 +193,9 @@ function mdsvexPages(options) {
 
                 // Give the page a title.
                 if (has(metadata, 'title')) {
-                    headScript = "    import { onDestroy } from 'svelte';\n    const prevTitle = document.title;\n    document.title = '" + metadata.title + "';\n    onDestroy(() => {document.title = prevTitle;});\n";
+                    headScript = "    import { onDestroy } from 'svelte';\n    const prevTitle = document.title;\n    document.title = `" + metadata.title + "`;\n    onDestroy(() => {document.title = prevTitle;});\n";
                 } else {
-                    headScript = "    import { onDestroy } from 'svelte';\n    const prevTitle = document.title;\n    document.title = '" + fileName.split('.')[0] + "';\n    onDestroy(() => {document.title = prevTitle;});\n";
+                    headScript = "    import { onDestroy } from 'svelte';\n    const prevTitle = document.title;\n    document.title = `" + fileName.split('.')[0] + "`;\n    onDestroy(() => {document.title = prevTitle;});\n";
                 }
 
                 // Regex for making sure we don't override user code with our injections.
