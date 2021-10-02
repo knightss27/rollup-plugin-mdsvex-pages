@@ -122,11 +122,12 @@ function mdsvexPages(options) {
                     
                     // Add imports and routes for all .md files.
                     files.forEach(function (file, index) {
-                        let name = path.parse(file).name;
+                        let name = path.parse(file).name.replace(/-/g, '');
+                        let componentName = name + docPath;
 
                         const metadata = matter(fs.readFileSync(path.resolve('src', docPath, file))).data
                         
-                        imports += "import " + name + docPath + " from './" + docPath + "/" + file + "'; \n";
+                        imports += "import " + componentName + " from './" + docPath + "/" + file + "'; \n";
 
                         if (has(metadata, 'id') && metadata.id !== name) {
                             name = metadata.id;
@@ -136,9 +137,9 @@ function mdsvexPages(options) {
                         }
                         
                         if (code.includes('const routes = {')) {
-                            routes += "'/" + docPath + "/" + name + "': " + path.parse(file).name + docPath + ",\n"
+                            routes += "'/" + docPath + "/" + name + "': " + componentName + ",\n"
                         } else {
-                            routes += "routes.set('/" + docPath + "/" + name + "', " + path.parse(file).name + docPath + ");\n" 
+                            routes += "routes.set('/" + docPath + "/" + name + "', " + componentName + ");\n" 
                         }
                     })
 
