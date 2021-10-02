@@ -1,4 +1,4 @@
-'use strict'; // v1.2.19
+'use strict'; // v1.2.22
 
 const fs = require('fs');
 const path = require('path');
